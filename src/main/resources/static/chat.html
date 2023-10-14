@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Chat</title>
+    <script src="/webjars/sockjs-client/1.0.2/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/2.3.3/stomp.min.js"></script>
+    <script>
+        var stompClient = null;
+
+        function connect() {
+            var socket = new SockJS('/chat');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+                stompClient.subscribe('/topic/messages', function (response) {
+                    showMessage(JSON.parse(response.body));
+                });
+            });
+        }
+
+        function disconnect() {
+            if (stompClient !== null) {
+                stompClient.disconnect();
+            }
+            console.log("Disconnected");
+        }
+
+        function sendMessage() {
+            var message = {
+                content: document.getElementById('message').value,
+                sender: document.getElementById('sender').value
+            };
+            stompClient.send("/app/chat/message", {}, JSON.stringify(message));
+        }
+
+        function showMessage(message) {
+            var messageArea = document.getElementById('messageArea');
+            var messageElement = document.createElement('p');
+            messageElement.textContent = message.sender + ": " + message.content;
+            messageArea.appendChild(messageElement);
+        }
+    </script>
+</head>
+<body>
+    <h1>WebSocket Chat</h1>
+    <div>
+        <input type="text" id="sender" placeholder="Your Name">
+        <input type="text" id="message" placeholder="Message">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+    <div id="messageArea"></div>
+    <script>connect();</script>
+</body>
+</html>
