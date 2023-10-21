@@ -1,6 +1,8 @@
 package com.vivah.vivah.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Modifying;
@@ -10,8 +12,10 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.vivah.vivah.modeltwo.Delete;
 import com.vivah.vivah.modeltwo.Feedback;
 import com.vivah.vivah.modeltwo.PhoneBook;
+import com.vivah.vivah.modeltwo.Report;
 import com.vivah.vivah.modeltwo.User;
 import com.vivah.vivah.modeltwo.Visitor;
 
@@ -24,39 +28,44 @@ public interface RegistrationRepository extends CrudRepository<User, Long> {
 	// register api email and phoneNumber search the data
 	@Query(value = "SELECT u.email FROM User u WHERE u.email = :email", nativeQuery = true)
 	String SearchMail(String email);
-	
-	
 
-
-
-	
-	
+	@Query(value = "SELECT u.user_id FROM user u ORDER BY u.user_id DESC LIMIT 1", nativeQuery = true)
+	String getLastUserId();
 
 	@Query(value = "SELECT u.phone_Number FROM User u WHERE u.phone_Number = :phoneNumber", nativeQuery = true)
 	String SearchPhoneNumber(String phoneNumber);
 
-	// this code method for login method
+	// this code method for login method public User
 	public User findByEmailAndPassword(String email, String password);
 
 	public User findByPhoneNumberAndPassword(String phoneNumber, String password);
 
-	// update the user data 
+	// GET USER BY ID ONE BY ONE
+	@Query(value = "SELECT * FROM user u WHERE u.user_id IN (:userId)", nativeQuery = true)
+	Optional<User> getUserByUserId(String userId);
+
+	// DELETE USER ACCOUNT BY USERID
+//	@Transactional
+//	void deleteByUserid(String userId);
+
+	// update the user data
+
 	@Modifying
 	@Transactional
-	@Query(value = "UPDATE User u SET " + "u.password = :#{#user.password}, " + "u.incomeRange = :#{#user.incomeRange}, "
-			+ "u.city = :#{#user.city}, " + "u.state = :#{#user.state}, " + "u.diet = :#{#user.diet}, "
-			+ "u.education = :#{#user.education}, " + "u.occupation = :#{#user.occupation}, "
-			+ "u.profilePhoto = :#{#user.profilePhoto}, " + "u.employedIn = :#{#user.employedIn}, "
-			+ "u.familyBasedOut = :#{#user.familyBasedOut}, " + "u.familySize = :#{#user.familySize}, "
-			+ "u.manglikStatus = :#{#user.manglikStatus}, " + "u.activityOnSite = :#{#user.activityOnSite}, "
-			+ "u.maritalStatus = :#{#user.maritalStatus}, " + "u.casteGroup = :#{#user.casteGroup}, "
-			+ "u.subCaste = :#{#user.subCaste}, " + "u.isVerifiedProfile = :#{#user.isVerifiedProfile}, "
-			+ "u.casteNoBar = :#{#user.casteNoBar}, " + "u.postedBy = :#{#user.postedBy}, "
-			+ "u.isRecentlyJoined = :#{#user.isRecentlyJoined}, " + "u.isOnline = :#{#user.isOnline}, "
-			+ "u.viewedProfiles = :#{#user.viewedProfiles}, " + "u.notViewedProfiles = :#{#user.notViewedProfiles}, "
-			+ "u.faceCut = :#{#user.faceCut}, " + "u.bodyType = :#{#user.bodyType}, "
-			+ "u.transferLocation = :#{#user.transferLocation}, " + "u.hobbies = :#{#user.hobbies}, "
-			+ "u.habits = :#{#user.habits}, "
+	@Query(value = "UPDATE User u SET " + "u.password = :#{#user.password}, "
+			+ "u.incomeRange = :#{#user.incomeRange}, " + "u.city = :#{#user.city}, " + "u.state = :#{#user.state}, "
+			+ "u.diet = :#{#user.diet}, " + "u.education = :#{#user.education}, "
+			+ "u.occupation = :#{#user.occupation}, " + "u.profilePhoto = :#{#user.profilePhoto}, "
+			+ "u.employedIn = :#{#user.employedIn}, " + "u.familyBasedOut = :#{#user.familyBasedOut}, "
+			+ "u.familySize = :#{#user.familySize}, " + "u.manglikStatus = :#{#user.manglikStatus}, "
+			+ "u.activityOnSite = :#{#user.activityOnSite}, " + "u.maritalStatus = :#{#user.maritalStatus}, "
+			+ "u.casteGroup = :#{#user.casteGroup}, " + "u.subCaste = :#{#user.subCaste}, "
+			+ "u.isVerifiedProfile = :#{#user.isVerifiedProfile}, " + "u.casteNoBar = :#{#user.casteNoBar}, "
+			+ "u.postedBy = :#{#user.postedBy}, " + "u.isRecentlyJoined = :#{#user.isRecentlyJoined}, "
+			+ "u.isOnline = :#{#user.isOnline}, " + "u.viewedProfiles = :#{#user.viewedProfiles}, "
+			+ "u.notViewedProfiles = :#{#user.notViewedProfiles}, " + "u.faceCut = :#{#user.faceCut}, "
+			+ "u.bodyType = :#{#user.bodyType}, " + "u.transferLocation = :#{#user.transferLocation}, "
+			+ "u.hobbies = :#{#user.hobbies}, " + "u.habits = :#{#user.habits}, "
 			+ "u.isInterestedInSettlingAbroad = :#{#user.isInterestedInSettlingAbroad}, "
 			+ "u.personLookingFor = :#{#user.personLookingFor}, " + "u.healthIssues = :#{#user.healthIssues}, "
 			+ "u.eyesightRequirement = :#{#user.eyesightRequirement}, " + "u.sistersCount = :#{#user.sistersCount}, "
@@ -64,16 +73,14 @@ public interface RegistrationRepository extends CrudRepository<User, Long> {
 			+ "u.familyBackground = :#{#user.familyBackground}, " + "u.message = :#{#user.healthIssues}, "
 			+ "u.familyBackground = :#{#user.familyBackground} ," + "u.religion = :#{#user.religion} ,"
 			+ "u.country = :#{#user.country} ," + "u.confirmPassword = :#{#user.confirmPassword} ,"
-			+ "u.motherTongue = :#{#user.motherTongue} "
-			+ "WHERE u.userid = :userid")
-		void updateProfile(@Param("user") User user, @Param("userid") String userid);
-	
-	
-	// SEARCH THE ALL DATABASE  value and provide AND SHOW
+			+ "u.motherTongue = :#{#user.motherTongue} " + "WHERE u.userId = :userId")
+	void updateProfile(@Param("user") User user, @Param("userId") String userd);
+
+	// SEARCH THE ALL DATABASE value and provide AND SHOW
+
 	@Modifying
 	@Transactional
-	@Query("SELECT u FROM User u WHERE " +
-			   "(:#{#criteria.userid} IS NULL OR u.userid = :#{#criteria.userid}) " 
+	@Query("SELECT u FROM User u WHERE " + "(:#{#criteria.userId} IS NULL OR u.userId = :#{#criteria.userId}) "
 			+ "and (:#{#criteria.country} IS NULL OR u.country = :#{#criteria.country}) "
 			+ "AND (:#{#criteria.city} IS NULL OR u.city = :#{#criteria.city}) "
 			+ "AND (:#{#criteria.state} IS NULL OR u.state = :#{#criteria.state}) "
@@ -118,92 +125,90 @@ public interface RegistrationRepository extends CrudRepository<User, Long> {
 			+ "AND (:#{#criteria.familyBackground} IS NULL OR u.familyBackground = :#{#criteria.familyBackground})")
 	List<User> searchByCriteria(@Param("criteria") User criteria);
 
-// ACCEPTE  MAPPING INSERT THE DATA
+	// ACCEPTE MAPPING INSERT THE DATA
+
 	@Modifying
 	@Transactional
 	@Query(value = "INSERT INTO user_mapping (user_id, accepted_mem) VALUES (:userId, :accepted_mem)", nativeQuery = true)
-	void acceptMem(@Param("userId") String userId, @Param("accepted_mem") int accepted_mem);
+	void acceptMem(@Param("userId") String userId, @Param("accepted_mem") String accepted_mem);
 
-//DECLINE MAPPING INSERT THE DATA
+	// DECLINE MAPPING INSERT THE DATA
+
 	@Modifying
 	@Transactional
 	@Query(value = "INSERT INTO user_mapping (user_id, declined_mem) VALUES (:userId, :declined_Mem)", nativeQuery = true)
-	void declinedMem(@Param("userId") String userId, @Param("declined_Mem") int declined_Mem);
+	void declinedMem(@Param("userId") String userId, @Param("declined_Mem") String declined_Mem);
 
-// SHORT MAPPING INSERT THE DATA
+	// SHORT MAPPING INSERT THE DATA
+
 	@Modifying
 	@Transactional
 	@Query(value = "INSERT INTO user_mapping (user_id, shortlisted_mem) VALUES (:userId, :shortlisted_mem)", nativeQuery = true)
-	void shortlistedmem(@Param("userId") String userId, @Param("shortlisted_mem") int shortlisted_mem);
+	void shortlistedmem(@Param("userId") String userId, @Param("shortlisted_mem") String shortlisted_mem);
 
-//SEND  MAPPING INSERT THE DATA
+	// SEND MAPPING INSERT THE DATA
 	@Modifying
 	@Transactional
 	@Query(value = "INSERT INTO user_mapping (user_id, send_mem) VALUES (:userId, :send_mem)", nativeQuery = true)
-	void sendmem(@Param("userId") String userId, @Param("send_mem") int send_mem);
+	void sendmem(@Param("userId") String userId, @Param("send_mem") String send_mem);
 
-// RECEIVED MAPPING INSERT THE DATA
+	// RECEIVED MAPPING INSERT THE DATA
 	@Modifying
 	@Transactional
 	@Query(value = "INSERT INTO user_mapping (user_id, received_mem) VALUES (:userId, :received_mem)", nativeQuery = true)
-	void receivedmem(@Param("userId") String userId, @Param("received_mem") int received_mem);
+	void receivedmem(@Param("userId") String userId, @Param("received_mem") String received_mem);
 
-//BLOCKED MAPPING INSERT THE DATA
+	// BLOCKED MAPPING INSERT THE DATA
 	@Modifying
 	@Transactional
 	@Query(value = "INSERT INTO user_mapping (user_id, blocked_mem) VALUES (:userId, :blocked_mem)", nativeQuery = true)
-	void blockedmem(@Param("userId") String userId, @Param("blocked_mem") int blocked_mem);
+	void blockedmem(@Param("userId") String userId, @Param("blocked_mem") String blocked_mem);
 
-//ACCEPTED MEMBER ALL LIST FIND 
-	@Query(value = "SELECT ac.accepted_mem FROM user_mapping ac WHERE ac.user_id IN (:userid)", nativeQuery = true)
-	List<Long> acceptedIdList(@Param("userid") String userid);
+	// ACCEPTED MEMBER ALL LIST FIND
+	@Query(value = "SELECT ac.accepted_mem FROM user_mapping ac WHERE ac.user_id IN (:userId)", nativeQuery = true)
+	List<String> acceptedIdList(@Param("userId") String userId);
 
-	@Query(value = "SELECT * FROM user u WHERE u.id IN (:allids)", nativeQuery = true)
-	List<User> allAccepted(@Param("allids") List<Long> allids);
+	@Query(value = "SELECT  * FROM user u WHERE u.user_id IN (:allids)", nativeQuery = true)
+	List<User> allAccepted(@Param("allids") List<String> allids);
 
-// DECLINED MEMBER ALL LIST FIND 
-	@Query(value = "SELECT ac.declined_mem FROM user_mapping ac WHERE ac.user_id IN (:userid)", nativeQuery = true)
-	List<Long> declineIdList(@Param("userid") String userid);
+	// DECLINED MEMBER ALL LIST FIND
+	@Query(value = "SELECT ac.declined_mem FROM user_mapping ac WHERE ac.user_id IN (:userId)", nativeQuery = true)
+	List<String> declineIdList(@Param("userId") String userId);
 
-	@Query(value = "SELECT * FROM user u WHERE u.id IN (:allids)", nativeQuery = true)
-	List<User> alldeclined(@Param("allids") List<Long> allids);
+	@Query(value = "SELECT *  FROM user u WHERE u.user_id IN (:allids)", nativeQuery = true)
+	List<User> alldeclined(@Param("allids") List<String> allids);
 
-//SHORTLISTED MEMBER ALL LIST FIND 
-	@Query(value = "SELECT ac.shortlisted_mem FROM user_mapping ac WHERE ac.user_id IN (:userid)", nativeQuery = true)
-	List<Long> shortIdList(@Param("userid") String userid);
+	// SHORTLISTED MEMBER ALL LIST FIND
+	@Query(value = "SELECT ac.shortlisted_mem FROM user_mapping ac WHERE ac.user_id IN (:userId)", nativeQuery = true)
+	List<String> shortIdList(@Param("userId") String userId);
 
-	@Query(value = "SELECT * FROM user u WHERE u.id IN (:allids)", nativeQuery = true)
-	List<User> allshortlisted(@Param("allids") List<Long> allids);
+	@Query(value = "SELECT  * FROM user u WHERE u.user_id IN (:allids)", nativeQuery = true)
+	List<User> allshortlisted(@Param("allids") List<String> allids);
 
-//SEND MEMBER ALL LIST FIND
-	@Query(value = "SELECT ac.send_mem FROM user_mapping ac WHERE ac.user_id IN (:userid)", nativeQuery = true)
-	List<Long> sendIdList(@Param("userid") String userid);
+	// SEND MEMBER ALL LIST FIND
+	@Query(value = "SELECT ac.send_mem FROM user_mapping ac WHERE ac.user_id IN (:userId)", nativeQuery = true)
+	List<String> sendIdList(@Param("userId") String userId);
 
-	@Query(value = "SELECT * FROM user u WHERE u.id IN (:allids)", nativeQuery = true)
-	List<User> allsendlisted(@Param("allids") List<Long> allids);
+	@Query(value = "SELECT *  FROM user u WHERE u.user_id IN (:allids)", nativeQuery = true)
+	List<User> allsendlisted(@Param("allids") List<String> allids);
 
-//RECEIVE MEMBER ALL LIST FIND
-	@Query(value = "SELECT ac.received_mem FROM user_mapping ac WHERE ac.user_id IN (:userid)", nativeQuery = true)
-	List<Long> receivedIdList(@Param("userid") String userid);
+	// RECEIVE MEMBER ALL LIST FIND
 
-	@Query(value = "SELECT * FROM user u WHERE u.id IN (:allids)", nativeQuery = true)
-	List<User> allreceivedlisted(@Param("allids") List<Long> allids);
+	@Query(value = "SELECT ac.received_mem FROM user_mapping ac WHERE ac.user_id IN (:userId)", nativeQuery = true)
+	List<String> receivedIdList(@Param("userId") String userId);
 
-// BLOCKED MEMBER ALL LIST FIND
-	@Query(value = "SELECT ac.blocked_mem FROM user_mapping ac WHERE ac.user_id IN (:userid)", nativeQuery = true)
-	List<Long> blockedIdList(@Param("userid") String userid);
+	@Query(value = "SELECT  * FROM user u WHERE u.user_id IN (:allids)", nativeQuery = true)
+	List<User> allreceivedlisted(@Param("allids") List<String> allids);
 
-	@Query(value = "SELECT * FROM user u WHERE u.id IN (:allids)", nativeQuery = true)
-	List<User> allblockedlisted(@Param("allids") List<Long> allids);
+	// BLOCKED MEMBER ALL LIST FIND
 
-	User getUserByName(String name);
+	@Query(value = "SELECT ac.blocked_mem FROM user_mapping ac WHERE ac.user_id IN (:userId)", nativeQuery = true)
+	List<String> blockedIdList(@Param("userId") String userid);
 
-//		@Query(value = "SELECT u.name,u.city FROM user u WHERE u.id IN (:allids)", nativeQuery = true)
-//		List<UserMapping> allaccepted(@Param("allids") List<Integer> allids);	
+	@Query(value = "SELECT *  FROM user u WHERE u.user_id IN (:allids)", nativeQuery = true)
+	List<User> allblockedlisted(@Param("allids") List<String> allids);
 
-	Visitor save(Visitor visitor);
-
-// create the feedback user save the data
+	// create the feedback user save the data
 	Feedback save(Feedback feedback);
 
 	// feedback list find and post order by descending order
@@ -211,40 +216,64 @@ public interface RegistrationRepository extends CrudRepository<User, Long> {
 	@Query("SELECT f FROM Feedback f ORDER BY f.rating DESC")
 	List<Feedback> findAllByRatingDescending();
 
+//	  User getUserByName(String name)
 
-	User getUserByEmail(String email);
-	
-	
-   //phonebook list find
-	@Query(nativeQuery = true, value = "SELECT userid, name, phone_number FROM user")
+	Visitor save(Visitor visitor);
+
+	// phonenumber find by the userid
+	@Query(value = "SELECT u.name, u.phone_number, u.profile_photo FROM user u WHERE u.user_id = :userId", nativeQuery = true)
+	Optional<Map<String, Object>> getUsersByUserId(@Param("userId") String userId);
+
+	// this code phonebook user found where limit set
+	@Query(nativeQuery = true, value = "SELECT user_id, name, phone_number,profile_photo FROM user LIMIT 10")
 	List<Object[]> PhonebookList();
-
-	   // according to the userid phonebook   find
-	 @Query("SELECT u.phoneNumber , u.name FROM User u WHERE u.userid = :userid")
-	    String findPhoneNumberByUserid(@Param("userid") String userid);
-
-
-	@Query(value = "SELECT * FROM user u WHERE u.userid IN (:idList)", nativeQuery = true)
-
-	List<User> getUsersByIds(List<Integer> idList);
-
-
-
-
-	@Query(value = "SELECT * FROM user u WHERE u.userid IN (:userid)", nativeQuery = true)
-
-	Optional<User> getUserByUserid(String userid);
-	
-	@Query(value = "SELECT u.userid FROM user u ORDER BY u.userid DESC LIMIT 1", nativeQuery = true)
-	String getLastUserId();
-	
-	
 	
 	@Transactional
-	void deleteByUserid(String userid);
+	void deleteByUserId(String userId);
 
+	Optional<User> findByUserId(String userId);
 
+	Delete save(Delete obj);
 
+	
+	// change password for profile only 
+	User getUserByEmail(String userEmail);
+	
+	// recently_joined find data  joinDate is greater than or equal to the specified startDate
+	 @Query("SELECT u.userId,u.name, u.email, u.profilePhoto, u.country, u.joinDate FROM User u WHERE u.joinDate >= :startDate ORDER BY u.joinDate DESC")
+	    List<Object[]> findRecentlyJoinedUsers(LocalDate startDate);
+	
+	
+	
 
+//	List<User> getUsersByUserIds(List<String> userIdList);
+
+//	List<User> getUsersByUserId(List<String> userIdList);
+
+	/*
+	 * 
+	 * User getUserByEmail(String email);
+	 * 
+	 * 
+	 * //phonebook list find
+	 * 
+	 * // according to the userid phonebook find
+	 * 
+	 * @Query("SELECT u.phoneNumber , u.name FROM User u WHERE u.userId = :userId")
+	 * String findPhoneNumberByUserId(@Param("userId") String userid);
+	 * 
+	 * 
+	 * @Query(value = "SELECT * FROM user u WHERE u.userId IN (:idList)",
+	 * nativeQuery = true) List<User> getUsersByIds(List<Integer> idList);
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 */
 
 }

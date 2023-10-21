@@ -1,17 +1,20 @@
 package com.vivah.vivah.Repository;
 
-import java.util.List;
+import java.util.Optional;
 
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import com.vivah.vivah.modeltwo.Feedback;
+import com.vivah.vivah.modeltwo.ShowProfile;
 
 @Repository
 @EnableJpaRepositories
-public interface FeedbackRepository  extends CrudRepository<Feedback,Long>{
+public interface SettingRepository  extends CrudRepository<ShowProfile,Long>{
+
+	Optional<ShowProfile> findByUserId(String userId);
+
+//	ShowProfile save(ShowProfile showProfile);
 	
 	
 	

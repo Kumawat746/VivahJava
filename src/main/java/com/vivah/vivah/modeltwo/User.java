@@ -1,5 +1,7 @@
 package com.vivah.vivah.modeltwo;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -8,7 +10,6 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.Data;
 
-//search commit//////
 @Entity
 @Table(name = "user")
 @Data
@@ -17,7 +18,7 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 	
-	private String  userid;
+	private String  userId;
 
 	private String name;
 	private String email;
@@ -72,6 +73,12 @@ private String religion;
 	private String preferredCity;
 	private String familyBackground;
 	private String createProfileFor;
+	
+	
+    private boolean profileVisible;
+    private LocalDate joinDate;
+
+
 
 	private String message;
 

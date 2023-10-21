@@ -1,6 +1,7 @@
 package com.vivah.vivah.modeltwo;
 
-import java.io.File;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,20 +11,27 @@ import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
+@Table(name = "show_profile")
+
 @Data
-@Table(name = "report")
-public class Report {
+public class ShowProfile {
+	
 	
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private String userId;
-	private String reportUserId;
-	private String email;
-	private String comment;
-	private File attachFile;
 	
+    private String userId;
 
-	
-	
+    private String name;
+
+    private boolean profileVisible;
+
+    private LocalDate hiddenUntil;
+
+    private LocalDateTime lastHideDate;
+
+    private LocalDateTime lastUnhideDate;
+
+
 }
