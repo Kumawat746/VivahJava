@@ -242,6 +242,8 @@ public interface RegistrationRepository extends CrudRepository<User, Long> {
 	// recently_joined find data  joinDate is greater than or equal to the specified startDate
 	 @Query("SELECT u.userId,u.name, u.email, u.profilePhoto, u.country, u.joinDate FROM User u WHERE u.joinDate >= :startDate ORDER BY u.joinDate DESC")
 	    List<Object[]> findRecentlyJoinedUsers(LocalDate startDate);
+
+	User findByPhoneNumber(String phone);
 	
 	
 	

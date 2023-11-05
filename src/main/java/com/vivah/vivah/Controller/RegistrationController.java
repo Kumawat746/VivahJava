@@ -667,7 +667,7 @@ public class RegistrationController {
 	// ...
 
 	@PostMapping("/verify")
-	public ResponseEntity<String> verifyOtp(@RequestBody Otpclass otp) {
+	public ResponseEntity<String> verifyotp(@RequestBody Otpclass otp) {
 		// Get the OTP from the request body
 		String userOtp = otp.getOtp();
 
@@ -710,6 +710,82 @@ public class RegistrationController {
 	    return ResponseEntity.ok(recentlyJoinedUsers);
 	}
 	
+	@PostMapping("/sentOtp")
+	public ResponseEntity<String> sendOtp(@RequestBody SmsPojo sms) {
+		String phone = sms.getPhoneNumber();
+
+		try {
+			if (StringUtils.isEmpty(phone)) {
+				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+						.body("Failure: Phone number cannot be empty");
+			} else {
+				// Check if the phone number exists in the database
+				User user = repo.findByPhoneNumber(phone);
+				System.out.println(phone);
+				if (user != null) {
+					String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+					service.sentOtp(sms);
+					return ResponseEntity.ok("Success: OTP sent");
+				} else {
+					return ResponseEntity.status(HttpStatus.NOT_FOUND)
+							.body("Failure: Phone number not found in the database");
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: An error occurred");
+		}
+	}
+
+	@PostMapping("/verifyOtp")
+	public ResponseEntity<String> verifyOtp(@RequestBody Otpclass otp) {
+		String userOtp = otp.getOtp();
+
+		try {
+			if (StringUtils.isEmpty(userOtp)) {
+				return ResponseEntity.badRequest().body("Failure: OTP cannot be empty");
+			} else {
+				boolean isValidOtp = service.verifyOtp(userOtp);
+				return ResponseEntity.ok("{\"success\":" + isValidOtp + "}");
+			}
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failure: An error occurred");
+		}
+	}
+
+	@PostMapping("/changePasswordOtp")
+	public ResponseEntity<String> changePassword(@RequestBody SmsPojo chagePassword) {
+		try {
+			boolean isValidOtp = service.verifyOtp(chagePassword.getOtp());
+
+			if (isValidOtp) {
+				// Log the phone number for debugging
+				System.out.println("Phone Number: " + chagePassword.getPhoneNumber());
+
+				// Retrieve user from the database using the phone number
+				User user = repo.findByPhoneNumber(chagePassword.getPhoneNumber());
+
+				if (user != null) {
+					// Update the user's password
+					user.setPassword(chagePassword.getNewPassword());
+					user.setConfirmPassword(chagePassword.getNewPassword());
+
+					// Optionally, update the password in the database
+					repo.save(user);
+
+					return ResponseEntity.ok("{\"status\":\"password-change success\"}");
+				} else {
+					return ResponseEntity.status(HttpStatus.NOT_FOUND)
+							.body("Failure: User not found with the given phone number");
+				}
+			} else {
+				return ResponseEntity.ok("{\"status\":\"password-change failure\", \"message\":\"Invalid OTP\"}");
+			}
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failure: An error occurred");
+		}
+	}
+
 	
 	
 
