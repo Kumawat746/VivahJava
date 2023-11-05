@@ -632,70 +632,7 @@ public class RegistrationController {
 	    }
 	}
 	
-	
-	
 
-	@PostMapping("/sentOtp")
-	public ResponseEntity<String> SentOtp(@RequestBody SmsPojo sms) {
-
-		// Get the phone number from the request body
-		String phone = sms.getPhoneNumber();
-
-		try {
-			if (phone.equals(null)) {
-				// Return a failure message
-
-				// Send a message to the topic
-
-				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-						.body("Failure: Phone number cannot be 0");
-			} else {
-				String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-
-				service.sentOtp(sms);
-				websocket.convertAndSend("/sms", timeStamp + "sms sent" + sms.getPhoneNumber());
-				// Return a success message
-				return ResponseEntity.ok("Success");
-
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: An error occurred");
-		}
-	}
-
-	// ...
-
-	@PostMapping("/verify")
-	public ResponseEntity<String> verifyotp(@RequestBody Otpclass otp) {
-		// Get the OTP from the request body
-		String userOtp = otp.getOtp();
-
-		try {
-			if (StringUtils.isEmpty(userOtp)) {
-				// Return a bad request response
-				return ResponseEntity.badRequest().body("Failure: OTP cannot be empty");
-			} else {
-				// Verify the OTP using your service
-				boolean isValidOtp = service.verifyOtp(userOtp);
-
-				JSONObject jsonresponse = new JSONObject(); // Create a JSON object
-
-				if (isValidOtp) {
-					// Return a success response with a JSON object
-					jsonresponse.put("success", true);
-					return ResponseEntity.ok(jsonresponse.toString());
-				} else {
-					// Return a failure response with a JSON object
-					jsonresponse.put("success", false);
-					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(jsonresponse.toString());
-				}
-			}
-		} catch (Exception e) {
-			// Handle other exceptions if needed
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failure: An error occurred");
-		}
-	}
 	// retrieve recently joined users
 	@GetMapping("/recently-joined")
 	public ResponseEntity<List<Object[]>> getRecentlyJoinedUsers() {
@@ -737,7 +674,7 @@ public class RegistrationController {
 		}
 	}
 
-	@PostMapping("/verifyOtp")
+	@PostMapping("/verifyotp")
 	public ResponseEntity<String> verifyOtp(@RequestBody Otpclass otp) {
 		String userOtp = otp.getOtp();
 
@@ -753,7 +690,7 @@ public class RegistrationController {
 		}
 	}
 
-	@PostMapping("/changePasswordOtp")
+	@PostMapping("/changepassword")
 	public ResponseEntity<String> changePassword(@RequestBody SmsPojo chagePassword) {
 		try {
 			boolean isValidOtp = service.verifyOtp(chagePassword.getOtp());
