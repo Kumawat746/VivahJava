@@ -12,12 +12,15 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.vivah.vivah.modeltwo.Delete;
-import com.vivah.vivah.modeltwo.Feedback;
-import com.vivah.vivah.modeltwo.PhoneBook;
-import com.vivah.vivah.modeltwo.Report;
-import com.vivah.vivah.modeltwo.User;
-import com.vivah.vivah.modeltwo.Visitor;
+import com.vivah.vivah.model.Delete;
+import com.vivah.vivah.model.Filter;
+import com.vivah.vivah.model.Feedback;
+import com.vivah.vivah.model.PhoneBook;
+import com.vivah.vivah.model.Registration;
+import com.vivah.vivah.model.Report;
+import com.vivah.vivah.model.User;
+import com.vivah.vivah.model.UserMapping;
+import com.vivah.vivah.model.Visitor;
 
 import jakarta.transaction.Transactional;
 
@@ -25,20 +28,8 @@ import jakarta.transaction.Transactional;
 @EnableJpaRepositories
 public interface RegistrationRepository extends CrudRepository<User, Long> {
 
-	// register api email and phoneNumber search the data
-	@Query(value = "SELECT u.email FROM User u WHERE u.email = :email", nativeQuery = true)
-	String SearchMail(String email);
-
-	@Query(value = "SELECT u.user_id FROM user u ORDER BY u.user_id DESC LIMIT 1", nativeQuery = true)
+	@Query(value = "SELECT u.user_id FROM registration u ORDER BY u.user_id DESC LIMIT 1", nativeQuery = true)
 	String getLastUserId();
-
-	@Query(value = "SELECT u.phone_Number FROM User u WHERE u.phone_Number = :phoneNumber", nativeQuery = true)
-	String SearchPhoneNumber(String phoneNumber);
-
-	// this code method for login method public User
-	public User findByEmailAndPassword(String email, String password);
-
-	public User findByPhoneNumberAndPassword(String phoneNumber, String password);
 
 	// GET USER BY ID ONE BY ONE
 	@Query(value = "SELECT * FROM user u WHERE u.user_id IN (:userId)", nativeQuery = true)
@@ -52,9 +43,8 @@ public interface RegistrationRepository extends CrudRepository<User, Long> {
 
 	@Modifying
 	@Transactional
-	@Query(value = "UPDATE User u SET " + "u.password = :#{#user.password}, "
-			+ "u.incomeRange = :#{#user.incomeRange}, " + "u.city = :#{#user.city}, " + "u.state = :#{#user.state}, "
-			+ "u.diet = :#{#user.diet}, " + "u.education = :#{#user.education}, "
+	@Query(value = "UPDATE User u SET " + "u.incomeRange = :#{#user.incomeRange}, " + "u.city = :#{#user.city}, "
+			+ "u.state = :#{#user.state}, " + "u.diet = :#{#user.diet}, " + "u.education = :#{#user.education}, "
 			+ "u.occupation = :#{#user.occupation}, " + "u.profilePhoto = :#{#user.profilePhoto}, "
 			+ "u.employedIn = :#{#user.employedIn}, " + "u.familyBasedOut = :#{#user.familyBasedOut}, "
 			+ "u.familySize = :#{#user.familySize}, " + "u.manglikStatus = :#{#user.manglikStatus}, "
@@ -72,8 +62,8 @@ public interface RegistrationRepository extends CrudRepository<User, Long> {
 			+ "u.brothersCount = :#{#user.brothersCount}, " + "u.preferredCity = :#{#user.preferredCity}, "
 			+ "u.familyBackground = :#{#user.familyBackground}, " + "u.message = :#{#user.healthIssues}, "
 			+ "u.familyBackground = :#{#user.familyBackground} ," + "u.religion = :#{#user.religion} ,"
-			+ "u.country = :#{#user.country} ," + "u.confirmPassword = :#{#user.confirmPassword} ,"
-			+ "u.motherTongue = :#{#user.motherTongue} " + "WHERE u.userId = :userId")
+			+ "u.country = :#{#user.country} ," + "u.motherTongue = :#{#user.motherTongue} "
+			+ "WHERE u.userId = :userId")
 	void updateProfile(@Param("user") User user, @Param("userId") String userd);
 
 	// SEARCH THE ALL DATABASE value and provide AND SHOW
@@ -91,10 +81,6 @@ public interface RegistrationRepository extends CrudRepository<User, Long> {
 			+ "AND (:#{#criteria.motherTongue} IS NULL OR u.motherTongue = :#{#criteria.motherTongue}) "
 			+ "AND (:#{#criteria.isOnline} IS NULL OR u.isOnline = :#{#criteria.isOnline}) "
 			+ "AND (:#{#criteria.isVerifiedProfile} IS NULL OR u.isVerifiedProfile = :#{#criteria.isVerifiedProfile}) "
-			+ "AND (:#{#criteria.heightMin} IS NULL OR u.heightMin = :#{#criteria.heightMin}) "
-			+ "AND (:#{#criteria.heightMax} IS NULL OR u.heightMax = :#{#criteria.heightMax}) "
-			+ "AND (:#{#criteria.ageMin} IS NULL OR u.ageMin = :#{#criteria.ageMin}) "
-			+ "AND (:#{#criteria.ageMax} IS NULL OR u.ageMax = :#{#criteria.ageMax}) "
 			+ "AND (:#{#criteria.incomeRange} IS NULL OR u.incomeRange = :#{#criteria.incomeRange}) "
 			+ "AND (:#{#criteria.profilePhoto} IS NULL OR u.profilePhoto = :#{#criteria.profilePhoto}) "
 			+ "AND (:#{#criteria.employedIn} IS NULL OR u.employedIn = :#{#criteria.employedIn}) "
@@ -227,7 +213,7 @@ public interface RegistrationRepository extends CrudRepository<User, Long> {
 	// this code phonebook user found where limit set
 	@Query(nativeQuery = true, value = "SELECT user_id, name, phone_number,profile_photo FROM user LIMIT 10")
 	List<Object[]> PhonebookList();
-	
+
 	@Transactional
 	void deleteByUserId(String userId);
 
@@ -235,18 +221,12 @@ public interface RegistrationRepository extends CrudRepository<User, Long> {
 
 	Delete save(Delete obj);
 
-	
-	// change password for profile only 
+	// change password for profile only
 	User getUserByEmail(String userEmail);
-	
-	// recently_joined find data  joinDate is greater than or equal to the specified startDate
-	 @Query("SELECT u.userId,u.name, u.email, u.profilePhoto, u.country, u.joinDate FROM User u WHERE u.joinDate >= :startDate ORDER BY u.joinDate DESC")
-	    List<Object[]> findRecentlyJoinedUsers(LocalDate startDate);
 
-	User findByPhoneNumber(String phone);
-	
-	
-	
+	User findByPhoneNumber(String phoneNumber);
+
+	void save(Registration reg);
 
 //	List<User> getUsersByUserIds(List<String> userIdList);
 
@@ -277,5 +257,69 @@ public interface RegistrationRepository extends CrudRepository<User, Long> {
 	 * 
 	 * 
 	 */
+
+	@Modifying
+	@Transactional
+	@Query("SELECT u FROM User  u WHERE " + "(:#{#criteria.country} IS NULL OR u.country = :#{#criteria.country}) "
+			+ "AND (:#{#criteria.city} IS NULL OR u.city = :#{#criteria.city}) "
+			+ "AND (:#{#criteria.state} IS NULL OR u.state = :#{#criteria.state}) "
+			+ "AND (:#{#criteria.diet} IS NULL OR u.diet = :#{#criteria.diet}) "
+			+ "AND (:#{#criteria.education} IS NULL OR u.education = :#{#criteria.education}) "
+			+ "AND (:#{#criteria.occupation} IS NULL OR u.occupation = :#{#criteria.occupation}) "
+			+ "AND (:#{#criteria.religion} IS NULL OR u.religion = :#{#criteria.religion}) "
+			+ "AND (:#{#criteria.motherTongue} IS NULL OR u.motherTongue = :#{#criteria.motherTongue}) "
+			+ "AND (:#{#criteria.isOnline} IS NULL OR u.isOnline = :#{#criteria.isOnline}) "
+			+ "AND (:#{#criteria.isVerifiedProfile} IS NULL OR u.isVerifiedProfile = :#{#criteria.isVerifiedProfile}) "
+			+ "AND (:#{#criteria.heightMin} IS NULL OR u.heightMin = :#{#criteria.heightMin}) "
+			+ "AND (:#{#criteria.heightMax} IS NULL OR u.heightMax = :#{#criteria.heightMax}) "
+			+ "AND (:#{#criteria.ageMin} IS NULL OR u.ageMin = :#{#criteria.ageMin}) "
+			+ "AND (:#{#criteria.ageMax} IS NULL OR u.ageMax = :#{#criteria.ageMax}) "
+			+ "AND (:#{#criteria.incomeRange} IS NULL OR u.incomeRange = :#{#criteria.incomeRange}) " +
+
+			"AND (:#{#criteria.employedIn} IS NULL OR u.employedIn = :#{#criteria.employedIn}) "
+			+ "AND (:#{#criteria.familyBasedOut} IS NULL OR u.familyBasedOut = :#{#criteria.familyBasedOut}) "
+			+ "AND (:#{#criteria.familySize} IS NULL OR u.familySize = :#{#criteria.familySize}) "
+			+ "AND (:#{#criteria.manglikStatus} IS NULL OR u.manglikStatus = :#{#criteria.manglikStatus}) "
+			+ "AND (:#{#criteria.activityOnSite} IS NULL OR u.activityOnSite = :#{#criteria.activityOnSite}) "
+			+ "AND (:#{#criteria.maritalStatus} IS NULL OR u.maritalStatus = :#{#criteria.maritalStatus}) "
+			+ "AND (:#{#criteria.casteGroup} IS NULL OR u.casteGroup = :#{#criteria.casteGroup}) "
+			+ "AND (:#{#criteria.subCaste} IS NULL OR u.subCaste = :#{#criteria.subCaste}) "
+			+ "AND (:#{#criteria.casteNoBar} IS NULL OR u.casteNoBar = :#{#criteria.casteNoBar}) "
+			+ "AND (:#{#criteria.postedBy} IS NULL OR u.postedBy = :#{#criteria.postedBy}) "
+			+ "AND (:#{#criteria.isRecentlyJoined} IS NULL OR u.isRecentlyJoined = :#{#criteria.isRecentlyJoined}) "
+			+ "AND (:#{#criteria.viewedProfiles} IS NULL OR u.viewedProfiles = :#{#criteria.viewedProfiles}) "
+			+ "AND (:#{#criteria.notViewedProfiles} IS NULL OR u.notViewedProfiles = :#{#criteria.notViewedProfiles}) "
+			+ "AND (:#{#criteria.faceCut} IS NULL OR u.faceCut = :#{#criteria.faceCut}) "
+			+ "AND (:#{#criteria.bodyType} IS NULL OR u.bodyType = :#{#criteria.bodyType}) "
+			+ "AND (:#{#criteria.transferLocation} IS NULL OR u.transferLocation = :#{#criteria.transferLocation}) "
+			+ "AND (:#{#criteria.hobbies} IS NULL OR u.hobbies = :#{#criteria.hobbies}) "
+			+ "AND (:#{#criteria.habits} IS NULL OR u.habits = :#{#criteria.habits}) "
+			+ "AND (:#{#criteria.isInterestedInSettlingAbroad} IS NULL OR u.isInterestedInSettlingAbroad = :#{#criteria.isInterestedInSettlingAbroad}) "
+			+ "AND (:#{#criteria.personLookingFor} IS NULL OR u.personLookingFor = :#{#criteria.personLookingFor}) "
+			+ "AND (:#{#criteria.healthIssues} IS NULL OR u.healthIssues = :#{#criteria.healthIssues}) "
+			+ "AND (:#{#criteria.eyesightRequirement} IS NULL OR u.eyesightRequirement = :#{#criteria.eyesightRequirement}) "
+			+ "AND (:#{#criteria.sistersCount} IS NULL OR u.sistersCount = :#{#criteria.sistersCount}) "
+			+ "AND (:#{#criteria.brothersCount} IS NULL OR u.brothersCount = :#{#criteria.brothersCount}) "
+			+ "AND (:#{#criteria.preferredCity} IS NULL OR u.preferredCity = :#{#criteria.preferredCity}) "
+
+	)
+
+	List<User> filterUsers(@Param("criteria") Filter criteria);
+
+	@Query(value = "SELECT" + "    COUNT(accepted_mem) AS accepted," + "    COUNT(blocked_mem) AS blocked,"
+			+ "    COUNT(declined_mem) AS declined," + "    COUNT(send_mem) AS send,"
+			+ "    COUNT(shortlisted_mem) AS shortlisted" + " FROM new_user_mapping"
+			+ " WHERE user_id = :userId", nativeQuery = true)
+
+	Map<String, Long> allActivity(@Param("userId") String userId);
+
+//	List<User> getUserById(List<Integer> IdList);
+
+//
+//
+//	List<User> findvisitor(List<String> allids);
+//
+//
+//	List<String> getvisitor(String userId);
 
 }

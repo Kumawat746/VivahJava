@@ -1,6 +1,4 @@
-package com.vivah.vivah.modeltwo;
-
-import java.io.File;
+package com.vivah.vivah.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,10 +16,8 @@ public class Report {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String userId;
-	private String reportUserId;
 	private String email;
-	private String comment;
-	private File attachFile;
+	private String report;
 	
 
 	

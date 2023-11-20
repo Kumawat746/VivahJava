@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vivah.vivah.modeltwo.User;
-import com.vivah.vivah.modeltwo.Visitor;
+import com.vivah.vivah.model.User;
+import com.vivah.vivah.model.Visitor;
 
 @RestController
 @RequestMapping("/api")

@@ -12,7 +12,12 @@ import com.vivah.vivah.model.Userchat;
 
 
 public interface ChatMessageRepository extends CrudRepository<ChatMessage, Long> {
-    List<ChatMessage> findBySenderAndReceiver(User sender, User receiver);
 
-	List<ChatMessage> findBySenderAndReceiver(Userchat senderUser, Userchat receiverUser);
+    List<ChatMessage> findBySenderAndReceiver(Userchat sender, Userchat receiver);
+//    List<ChatMessage> findBySenderAndReceiver(User sender, User receiver);
+
+	void saveAndFlush(ChatMessage message);
+
+//	List<ChatMessage> findBySenderAndReceiver(Userchat senderUser, Userchat receiverUser);
+
 }

@@ -1,4 +1,4 @@
-package com.vivah.vivah.modeltwo;
+package com.vivah.vivah.model;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;

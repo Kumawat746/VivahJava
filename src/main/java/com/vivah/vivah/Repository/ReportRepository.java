@@ -5,12 +5,12 @@ import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import com.vivah.vivah.modeltwo.Report;
+import com.vivah.vivah.model.Report;
 
 @Repository
 public interface ReportRepository extends CrudRepository<Report, Long> {
 
-	Optional<Report> findByUserIdAndReportUserId(String userId, String reportUserId);
+//	Optional<Report> findByUserIdAndReportUserId(String userId, String reportUserId);
 	
 	
 

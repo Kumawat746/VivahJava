@@ -11,9 +11,9 @@ import com.vivah.vivah.model.StoreOtp;
 @Service
 public class SmsService extends StoreOtp {
 	 StoreOtp store = new StoreOtp();
-    private final String ACCOUNT_SID = "AC8997dca1cbcc24600747a9db56497d42";
-    private final String AUTH_TOKEN = "0e6f52f04315d70cd71d43e774eb00b8";
-    private final String FROM_NUMBER="+12524659521";
+    private final String ACCOUNT_SID = "AC3b197eff4c2741a8dad0e49a22995bde";
+    private final String AUTH_TOKEN = "9d55e10d87f251791c9d38b3e8001ca7";
+    private final String FROM_NUMBER="+15734923751";
     public void sentOtp(SmsPojo sms) {
         // Initialize Twilio with your credentials
         Twilio.init(ACCOUNT_SID, AUTH_TOKEN);

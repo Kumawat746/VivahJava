@@ -1,4 +1,4 @@
-package com.vivah.vivah.modeltwo;
+package com.vivah.vivah.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

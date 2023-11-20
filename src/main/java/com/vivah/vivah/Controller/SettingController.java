@@ -14,10 +14,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vivah.vivah.Repository.RegistrationRepository;
+import com.vivah.vivah.Repository.RepositorytwoRepo;
 import com.vivah.vivah.Repository.SettingRepository;
-import com.vivah.vivah.modeltwo.Delete;
-import com.vivah.vivah.modeltwo.ShowProfile;
-import com.vivah.vivah.modeltwo.User;
+import com.vivah.vivah.model.Delete;
+import com.vivah.vivah.model.Registration;
+import com.vivah.vivah.model.ShowProfile;
+import com.vivah.vivah.model.User;
 
 @RestController
 @RequestMapping("/api")
@@ -29,7 +31,10 @@ public class SettingController {
 	@Autowired
 	private SettingRepository settingRepo;
 
-	//change password after email , password match then newPassword create
+	@Autowired
+	private RepositorytwoRepo regtwo;
+
+	// change password after email , password match then newPassword create
 	@PostMapping("/change-password")
 	public String changePassword(@RequestParam("email") String userEmail,
 			@RequestParam("newPassword") String newPassword, @RequestParam("oldPassword") String oldPassword) {
@@ -38,7 +43,7 @@ public class SettingController {
 		System.out.println("NEW PASSWORD: " + newPassword);
 
 		// Assuming there's a method to get the user by email from the repository
-		User currentUser = this.repo.getUserByEmail(userEmail);
+		Registration currentUser = this.regtwo.getUserByEmail(userEmail);
 
 		if (currentUser != null && oldPassword.equals(currentUser.getPassword())) {
 			// Old password matches the current password for the user
@@ -85,7 +90,6 @@ public class SettingController {
 		// Assuming AnotherEntity is the entity for the new table
 		Delete obj = new Delete();
 		obj.setUserId(deletedUser.getUserId());
-		obj.setName(deletedUser.getName());
 		obj.setEmail(deletedUser.getEmail());
 		obj.setPhoneNumber(deletedUser.getPhoneNumber());
 
@@ -108,25 +112,25 @@ public class SettingController {
 			return ResponseEntity.ok("Profile for user " + userId + " is already hidden until " + hiddenUntil);
 		} else {
 			// Find the user by userId
-			Optional<User> optionalUser = repo.findByUserId(userId);
+			Optional<Registration> optionalUser = regtwo.findByUserId(userId);
 
 			if (optionalUser.isPresent()) {
 				// User found, get user details
-				User user = optionalUser.get();
+				Registration reg = optionalUser.get();
 
 				// Save show profile details for the hidden user
 				ShowProfile showProfile = new ShowProfile();
 				showProfile.setUserId(userId);
-				showProfile.setName(user.getName()); // Assuming User has a getUsername() method
-				showProfile.setProfileVisible(false);
+				showProfile.setUserName(reg.getUsername()); // Assuming User has a getUsername() method
+				showProfile.setProfileVisible(true);
 				showProfile.setHiddenUntil(LocalDate.now().plusDays(days)); // Set the hiddenUntil date
 				showProfile.setLastHideDate(LocalDateTime.now()); // Record the date when hidden
 				settingRepo.save(showProfile);
 
-				// Update the user's profile visibility in the main repository
-				user.setProfileVisible(false);
-				repo.save(user);
+				// Update the registration's profile visibility in the main repository
+				reg.setProfileVisible(true); // Update profileVisible field
 
+				regtwo.save(reg);
 				// Return a response indicating successful profile hiding
 				return ResponseEntity.ok("Profile hidden successfully for " + days + " days");
 			} else {
@@ -136,23 +140,24 @@ public class SettingController {
 		}
 	}
 
-	// UNHIDE YOUR PROFILE FOR AFETR CREATE HIDE
+	// Endpoint to unhide a registration's profile
 	@PostMapping("/unhide")
 	public ResponseEntity<String> unhideProfile(@RequestParam String userId) {
-		// Check if the user's profile entry exists in the ShowProfile table
-		Optional<ShowProfile> optionalProfile = settingRepo.findByUserId(userId);
-		if (optionalProfile.isPresent()) {
-			// User's profile found in the ShowProfile table
-			ShowProfile profile = optionalProfile.get();
-
+		return settingRepo.findByUserId(userId).map(profile -> {
 			// Set the profile visibility to true and reset the hiddenUntil field
 			profile.setProfileVisible(true);
 			profile.setHiddenUntil(null);
-
-			// Save additional details, e.g., log the unhide operation and update the last
-			// unhide date
 			profile.setLastUnhideDate(LocalDateTime.now());
+
+			// Save the updated profile entity to the settingRepo
 			settingRepo.save(profile);
+
+			// Find the user by userId in the main repository
+			regtwo.findByUserId(userId).ifPresent(user -> {
+				// Update the user's profile visibility in the main repository
+				user.setProfileVisible(true);
+				regtwo.save(user);
+			});
 
 			// Delete the profile entry from the settingRepo (optional, depending on your
 			// requirements)
@@ -160,9 +165,135 @@ public class SettingController {
 
 			// Return a response indicating successful profile unhiding
 			return ResponseEntity.ok("Profile unhid successfully");
+		}).orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profile not found"));
+	}
+
+	@PostMapping("/hidePhoneNumber")
+	public ResponseEntity<String> hidePhoneNumber(@RequestParam String userId, @RequestParam int hideStage) {
+		// Find the user by userId
+		Optional<Registration> optionalUser = regtwo.findByUserId(userId);
+
+		if (optionalUser.isPresent()) {
+			// User found, get user details
+			Registration reg = optionalUser.get();
+
+			switch (hideStage) {
+			case 1:
+				// Stage 1: Hide phone number for all members
+				reg.setHidePhoneNumber(0);
+				regtwo.save(reg);
+				return ResponseEntity.ok("Phone number hidden for all members");
+
+			case 2:
+				// Stage 2: Show phone number only for interested and accepted members
+				reg.setHidePhoneNumber(1);
+				regtwo.save(reg);
+
+				// Additional logic for case 2
+				// You may want to save specific data for case 2 in your user entity
+				// For example, user.setSomeField(value);
+				// repo.save(user);
+
+				return ResponseEntity.ok("Phone number shown only for interested and accepted members");
+
+			case 3:
+				// Stage 3: Unhide phone number for all members
+				reg.setHidePhoneNumber(2);
+				regtwo.save(reg);
+				return ResponseEntity.ok("Phone number visible for all members");
+
+			default:
+				return ResponseEntity.badRequest().body("Invalid hide stage");
+			}
 		} else {
-			// User's profile not found, return a not found response
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profile not found");
+			// User not found, return a not found response
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+		}
+	}
+
+	@PostMapping("/profileVisibility")
+	public ResponseEntity<String> profileVisibility(@RequestParam String userId, @RequestParam int ProfileVisibility) {
+		// Find the user by userId
+		Optional<Registration> optionalUser = regtwo.findByUserId(userId);
+
+		if (optionalUser.isPresent()) {
+			// User found, get user details
+			Registration reg = optionalUser.get();
+
+			switch (ProfileVisibility) {
+			case 1:
+				// Stage 1: Set album privacy for all members
+				reg.setProfileVisibility(0);
+				regtwo.save(reg);
+				return ResponseEntity.ok("Profile Visibility hide to all members");
+
+			case 2:
+				// Stage 2: Set album privacy for paid members and send and accepted members
+				reg.setProfileVisibility(1);
+				regtwo.save(reg);
+
+				// Additional logic for case 2
+				// You may want to save specific data for case 2 in your user entity
+				// For example, user.setSomeField(value);
+				// repo.save(user);
+
+				return ResponseEntity.ok("Profile visible  to fit My criteria");
+
+			case 3:
+				// Stage 3: Set album privacy for paid members only
+				reg.setProfileVisibility(2);
+				regtwo.save(reg);
+				return ResponseEntity.ok("Profile visible to all member");
+
+			default:
+				return ResponseEntity.badRequest().body("Invalid privacy stage");
+			}
+		} else {
+			// User not found, return a not found response
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+		}
+	}
+
+	@PostMapping("/albumPrivacy")
+	public ResponseEntity<String> createAlbumPrivacy(@RequestParam String userId, @RequestParam int privacyStage) {
+		// Find the user by userId
+		Optional<Registration> optionalUser = regtwo.findByUserId(userId);
+
+		if (optionalUser.isPresent()) {
+			// User found, get user details
+			Registration reg = optionalUser.get();
+
+			switch (privacyStage) {
+			case 1:
+				// Stage 1: Set album privacy for all members
+				reg.setAlbumPrivacy(0);
+				regtwo.save(reg);
+				return ResponseEntity.ok("Album hide to all members");
+
+			case 2:
+				// Stage 2: Set album privacy for paid members and send and accepted members
+				reg.setAlbumPrivacy(2);
+				regtwo.save(reg);
+
+				// Additional logic for case 2
+				// You may want to save specific data for case 2 in your user entity
+				// For example, user.setSomeField(value);
+				// repo.save(user);
+
+				return ResponseEntity.ok("Album visible to send/accepted members");
+
+			case 3:
+				// Stage 3: Set album privacy for paid members only
+				reg.setAlbumPrivacy(3);
+				regtwo.save(reg);
+				return ResponseEntity.ok("Album visible to paid members only");
+
+			default:
+				return ResponseEntity.badRequest().body("Invalid privacy stage");
+			}
+		} else {
+			// User not found, return a not found response
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
 		}
 	}
 

@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import com.vivah.vivah.modeltwo.MyOrder;
+import com.vivah.vivah.model.MyOrder;
 
 
 @Repository

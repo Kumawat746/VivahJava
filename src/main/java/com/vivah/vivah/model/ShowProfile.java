@@ -1,4 +1,4 @@
-package com.vivah.vivah.modeltwo;
+package com.vivah.vivah.model;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,7 +23,7 @@ public class ShowProfile {
 	
     private String userId;
 
-    private String name;
+    private String userName;
 
     private boolean profileVisible;
 
@@ -32,6 +32,7 @@ public class ShowProfile {
     private LocalDateTime lastHideDate;
 
     private LocalDateTime lastUnhideDate;
+
 
 
 }

@@ -1,4 +1,4 @@
-package com.vivah.vivah.modeltwo;
+package com.vivah.vivah.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,13 +15,13 @@ public class UserMapping {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long user_mappingId;
 	
-	private Long userId;
-	private Long accepted_mem ;
-	private Long declined_mem;
-	private Long shortlisted_mem;
-	private Long send_mem;
-	private Long received_mem;
-	private Long blocked_mem;
+	private String userId;
+	private String accepted_mem ;
+	private String declined_mem;
+	private String shortlisted_mem;
+	private String send_mem;
+	private String received_mem;
+	private String blocked_mem;
 	
 	
 	

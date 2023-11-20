@@ -1,4 +1,4 @@
-package com.vivah.vivah.modeltwo;
+package com.vivah.vivah.model;
 
 import java.time.LocalDate;
 
@@ -17,29 +17,36 @@ public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
-	
-	private String  userId;
 
-	private String name;
+	private String userId;
+
+	private String username;
+
 	private String email;
 	private String phoneNumber;
-	private String password;
-	private String confirmPassword;
-	private Integer heightMin;
-	private Integer heightMax;
-	private Integer ageMin;
-	private Integer ageMax;
 
-	private Integer age;
-private String religion;
+	private boolean profileVisible;
+	private Integer hidePhoneNumber = 0;
+	private Integer albumPrivacy = 0;
+	private Integer profileVisibility = 0;
+	private LocalDate joinDate;
+
+	private String religion;
 	private String motherTongue;
 	private Integer incomeRange;
-//	private Double maxIncome;
 	private String country;
 	private String city;
 	private String state;
 	private String diet;
 	private String education;
+
+	private Integer heightMin;
+	private Integer heightMax;
+	private Integer ageMin;
+	private Integer ageMax;
+	private Integer age;
+	private Integer height;
+
 	private String occupation;
 	@Lob
 	private byte[] profilePhoto;
@@ -73,12 +80,7 @@ private String religion;
 	private String preferredCity;
 	private String familyBackground;
 	private String createProfileFor;
-	
-	
-    private boolean profileVisible;
-    private LocalDate joinDate;
-
-
+	private int matchScore;
 
 	private String message;
 
